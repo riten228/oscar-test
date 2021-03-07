@@ -4,6 +4,7 @@ import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,14 +20,20 @@ class OscarFilmContainerServletTest {
 
     private OscarFilmContainerServlet underTest = new OscarFilmContainerServlet();
 
-    @Test
-    void sampleTest(AemContext context) throws IOException {
-        MockSlingHttpServletRequest request = context.request();
-        MockSlingHttpServletResponse response = context.response();
+    private AemContext context = new AemContext();
 
+    private MockSlingHttpServletRequest request = context.request();
+    private MockSlingHttpServletResponse response = context.response();
+
+    @BeforeEach
+    public void setUp() throws Exception {
         context.load().json("/oscars.json", "/content/oscars");
         context.currentResource("/content/oscars");
         request.setResource(context.currentResource());
+    }
+
+    @Test
+    void sampleTest() throws IOException {
 
         final Map<String, Object> params = new HashMap<>();
         /*params.put("minAwards", "4");*/
@@ -40,6 +47,18 @@ class OscarFilmContainerServletTest {
 //        assertThat(response.getOutputAsString(), containsString("Parasite"));
     }
 
+    @Test
+    void verifyResponseWhenNoParametersPassed() throws IOException {
+
+        final Map<String, Object> params = new HashMap<>();
+
+        request.setParameterMap(params);
+
+        underTest.doGet(request, response);
+
+//        assertThat(response.getContentType(), containsString("application/json"));
+//        assertThat(response.getOutputAsString(), containsString("Parasite"));
+    }
     //TODO add tests to verify your implementation
 
 

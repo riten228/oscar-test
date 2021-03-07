@@ -121,13 +121,33 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
 
     @Override
     public void doGet(final SlingHttpServletRequest req, final SlingHttpServletResponse resp) {
+
+        // Request parameter
+        /*List<RequestParameter> requestParams = req.getRequestParameterList();
+        System.out.println("requestParams List: " + requestParams);*/
+
+        /*Enumeration<String> parameterNames = req.getParameterNames();
+        while (parameterNames.hasMoreElements()) {
+
+            String paramName = parameterNames.nextElement();
+            System.out.println(paramName);
+
+            String[] paramValues = req.getParameterValues(paramName);
+            for (int i = 0; i < paramValues.length; i++) {
+                String paramValue = paramValues[i];
+                System.out.println("t" + paramValue);
+            }
+
+        }*/
+
         //TODO: remove this method call once your check is finished
         printEntries(req);
+
+
 
         String param = "";
         if(!req.getRequestParameterList().isEmpty()) {
             param = req.getRequestParameter("numberOfReferences").toString();
-
         }
 
         for(Film film : tempList) {
@@ -140,31 +160,23 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
             System.out.println("resultList Title: " + film.getTitle());
             System.out.println("resultList numberOfReferences: " + film.getNumberOfReferences());
         }
+
+        System.out.println("Size of filtered list: " + resultList.size());
+
+
         //TODO implement me
     }
 
     //TODO: remove this method once your check is finished
     private void printEntries(SlingHttpServletRequest req) {
         final Resource resource = req.getResource();
-        //Films newData = new Films();
-
-
 
         for (Resource child : resource.getChildren()) {
             Film fm = child.adaptTo(Film.class);
-            System.out.println("Child obj: " + child);
-            System.out.println("Film: " + fm.getTitle());
-
+            //System.out.println("Child obj: " + child);
+            //System.out.println("Film: " + fm.getTitle());
             tempList.add(fm);
-           /* System.out.println("Entry-Name: " + child.getName());
-            System.out.println("Entry: " + child.getValueMap());*/
         }
-        //newData.setFilmList(tempList);
-        System.out.println("Size of list: " + tempList.size());
-
-        /*for(Film film : tempList) {
-            System.out.println("Film: " + film.getTitle());
-        }*/
-
+        System.out.println("Size of provided list: " + tempList.size());
     }
 }
