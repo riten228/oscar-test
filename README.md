@@ -1,2 +1,0 @@
-# oscar-test
-Assignment test

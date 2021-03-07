@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-Category: ${componentGroupName}
+Bundle-Description: Core bundle for Test Task
+Bundle-ManifestVersion: 2
+Bundle-Name: Test Task - Core
+Bundle-SymbolicName: test.core
+Bundle-Version: 1.0.0.SNAPSHOT
+Import-Package: javax.servlet;version="[3.1,4)",org.apache.sling.api;v
+ ersion="[2.3,3)",org.apache.sling.api.resource;version="[2.11,3)",org
+ .apache.sling.api.servlets;version="[2.2,3)",org.apache.sling.models.
+ annotations;version="[1.5,2)",org.apache.sling.models.annotations.inj
+ ectorspecific;version="[1.1,2)",javax.annotation;version="0.0.0"
+Private-Package: de.cyberport.core.constants,de.cyberport.core.models,
+ de.cyberport.core.service,de.cyberport.core.servlets
+Provide-Capability: osgi.service;objectClass:List<String>="javax.servl
+ et.Servlet";uses:="javax.servlet"
+Require-Capability: osgi.extender;filter:="(&(osgi.extender=osgi.compo
+ nent)(version>=1.4.0)(!(version>=2.0.0)))",osgi.ee;filter:="(&(osgi.e
+ e=JavaSE)(version=1.8))"
+Service-Component: OSGI-INF/de.cyberport.core.servlets.OscarFilmContai
+ nerServlet.xml
+Sling-Model-Classes: de.cyberport.core.models.Film
+

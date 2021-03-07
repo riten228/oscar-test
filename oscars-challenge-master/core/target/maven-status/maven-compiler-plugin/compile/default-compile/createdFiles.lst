@@ -1,0 +1,6 @@
+de/cyberport/core/service/FilterData.class
+de/cyberport/core/service/FilterDataImpl.class
+de/cyberport/core/constants/OscarConstants.class
+de/cyberport/core/models/Film.class
+de/cyberport/core/servlets/OscarFilmContainerServlet.class
+de/cyberport/core/models/Films.class
