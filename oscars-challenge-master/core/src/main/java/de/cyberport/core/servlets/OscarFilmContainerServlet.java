@@ -3,6 +3,7 @@ package de.cyberport.core.servlets;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.cyberport.core.models.Film;
+import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Servlet that writes information about the Oscar films in json format into the response.
@@ -130,30 +132,38 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
     public void doGet(final SlingHttpServletRequest req, final SlingHttpServletResponse resp) throws IOException {
 
         //TODO: remove this method call once your check is finished
-        printEntries(req);
+        retrieveFilmsFromResource(req);
 
-        List<Film> resultFilms = tempList.stream()
+        String limit = req.getParameter("limit");
+
+        Stream<Film> filmStream = tempList.stream()
                 .filter(addParamFilters(req).stream().reduce(x->true, Predicate::and))
-                .sorted(getSortComparator(req))
-                .collect(Collectors.toList());
+                .sorted(getSortComparator(req));
+
+        List<Film> resultFilms;
+
+        if(StringUtils.isNotBlank(limit)) {
+            resultFilms = filmStream
+                    .limit(Integer.parseInt(limit))
+                    .collect(Collectors.toList());
+        } else {
+            resultFilms = filmStream.collect(Collectors.toList());
+        }
 
         System.out.println("Size of filtered list: " + resultFilms.size());
 
         ObjectMapper mapper = new ObjectMapper();
-        String responseJson = mapper.writeValueAsString(resultFilms);
+
         resp.setContentType("application/json; charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
-        resp.getOutputStream().print(responseJson);
+        mapper.writeValue(resp.getOutputStream(), resultFilms);
     }
 
-    //TODO: remove this method once your check is finished
-    private void printEntries(SlingHttpServletRequest req) {
+    private void retrieveFilmsFromResource(SlingHttpServletRequest req) {
         final Resource resource = req.getResource();
 
         for (Resource child : resource.getChildren()) {
             Film fm = child.adaptTo(Film.class);
-            //System.out.println("Child obj: " + child);
-            //System.out.println("Film: " + fm.getTitle());
             tempList.add(fm);
         }
         System.out.println("Size of provided list: " + tempList.size());
@@ -168,6 +178,11 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
                 paramPredicates.add(film -> film.getTitle().equalsIgnoreCase(title));
             }
 
+            String year = request.getParameter("year");
+            if (year != null && !year.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getYear()) == Integer.parseInt(year));
+            }
+
             String minYear = request.getParameter("minYear");
             if (minYear != null && !minYear.isEmpty()) {
                 paramPredicates.add(film -> Integer.parseInt(film.getYear()) >= Integer.parseInt(minYear));
@@ -175,7 +190,27 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
 
             String maxYear = request.getParameter("maxYear");
             if (maxYear != null && !maxYear.isEmpty()) {
-                paramPredicates.add(film -> Integer.parseInt(film.getYear()) >= Integer.parseInt(maxYear));
+                paramPredicates.add(film -> Integer.parseInt(film.getYear()) <= Integer.parseInt(maxYear));
+            }
+
+            String minAwards = request.getParameter("minAwards");
+            if (minAwards != null && !minAwards.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getYear()) >= Integer.parseInt(minAwards));
+            }
+
+            String maxAwards = request.getParameter("maxAwards");
+            if (maxAwards != null && !maxAwards.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getAwards()) <= Integer.parseInt(maxAwards));
+            }
+
+            String nominations = request.getParameter("nominations");
+            if (nominations != null && !nominations.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getNominations()) == Integer.parseInt(nominations));
+            }
+
+            String isBestPicture = request.getParameter("isBestPicture");
+            if (isBestPicture != null && !isBestPicture.isEmpty()) {
+                paramPredicates.add(film -> Boolean.parseBoolean(film.getIsBestPicture()) == Boolean.parseBoolean(isBestPicture));
             }
         }
 
