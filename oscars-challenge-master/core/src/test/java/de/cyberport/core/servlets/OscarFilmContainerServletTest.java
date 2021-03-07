@@ -4,14 +4,20 @@ import io.wcm.testing.mock.aem.junit5.AemContext;
 import io.wcm.testing.mock.aem.junit5.AemContextExtension;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletRequest;
 import org.apache.sling.testing.mock.sling.servlet.MockSlingHttpServletResponse;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 /**
  * @author Vitalii Afonin
@@ -33,44 +39,31 @@ class OscarFilmContainerServletTest {
         request.setResource(context.currentResource());
     }
 
-    @Disabled
     @Test
-    void sampleTest() throws IOException {
-
-        final Map<String, Object> params = new HashMap<>();
-        /*params.put("minAwards", "4");*/
-        params.put("numberOfReferences", "1105");
-
-        request.setParameterMap(params);
-
-        underTest.doGet(request, response);
-
-//        assertThat(response.getContentType(), containsString("application/json"));
-//        assertThat(response.getOutputAsString(), containsString("Parasite"));
-    }
-
-    @Disabled
-    @Test
+    @DisplayName("verifyResponseWhenNoParametersPassed")
     void verifyResponseWhenNoParametersPassed() throws IOException {
 
         final Map<String, Object> params = new HashMap<>();
-
         request.setParameterMap(params);
 
         underTest.doGet(request, response);
 
-//        assertThat(response.getContentType(), containsString("application/json"));
-//        assertThat(response.getOutputAsString(), containsString("Parasite"));
+       assertThat(response.getContentType(), containsString("application/json"));
+       System.out.println("response" + response.getOutputAsString());
+        /*JSONObject jsonObject = (JSONObject) JSONValue.parse(jsonString);*/
     }
     //TODO add tests to verify your implementation
 
     @Test
+    @DisplayName("verifyResponseWhenNoParametersPassed")
     void verifyResponseWhenTitleIsProvided() throws IOException {
         final Map<String, Object> params = new HashMap<>();
-        params.put("title", "Parasite");
+        params.put("title", "Spider-Man 2");
         request.setParameterMap(params);
 
         underTest.doGet(request, response);
+        assertThat(response.getContentType(), containsString("application/json"));
+        System.out.println("response" + response.getOutputAsString());
     }
 
     @Test
@@ -80,6 +73,8 @@ class OscarFilmContainerServletTest {
         request.setParameterMap(params);
 
         underTest.doGet(request, response);
+        assertThat(response.getContentType(), containsString("application/json"));
+        System.out.println("response" + response.getOutputAsString());
     }
 
     @Test
@@ -89,6 +84,8 @@ class OscarFilmContainerServletTest {
         request.setParameterMap(params);
 
         underTest.doGet(request, response);
+        assertThat(response.getContentType(), containsString("application/json"));
+        System.out.println("response" + response.getOutputAsString());
     }
 
     @Test
@@ -99,5 +96,7 @@ class OscarFilmContainerServletTest {
         request.setParameterMap(params);
 
         underTest.doGet(request, response);
+        assertThat(response.getContentType(), containsString("application/json"));
+        System.out.println("response" + response.getOutputAsString());
     }
 }

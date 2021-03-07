@@ -1,5 +1,7 @@
 package de.cyberport.core.servlets;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.cyberport.core.models.Film;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
@@ -12,6 +14,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceDescription;
 
 import javax.servlet.Servlet;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -124,7 +127,7 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
     private ArrayList<Film> resultList = new ArrayList<Film>();
 
     @Override
-    public void doGet(final SlingHttpServletRequest req, final SlingHttpServletResponse resp) {
+    public void doGet(final SlingHttpServletRequest req, final SlingHttpServletResponse resp) throws IOException {
 
         //TODO: remove this method call once your check is finished
         printEntries(req);
@@ -136,9 +139,11 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
 
         System.out.println("Size of filtered list: " + resultFilms.size());
 
+        ObjectMapper mapper = new ObjectMapper();
+        String responseJson = mapper.writeValueAsString(resultFilms);
+        resp.setContentType("application/json; charset=UTF-8");
         resp.setCharacterEncoding("UTF-8");
-        resp.setContentType("application/json;charset=UTF-8");
-        //resp.getWriter().write(resultFilms.toArray());
+        resp.getOutputStream().print(responseJson);
     }
 
     //TODO: remove this method once your check is finished
