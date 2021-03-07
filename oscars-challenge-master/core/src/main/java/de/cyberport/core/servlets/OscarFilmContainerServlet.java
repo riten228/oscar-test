@@ -1,18 +1,22 @@
 package de.cyberport.core.servlets;
 
 import de.cyberport.core.models.Film;
-import org.apache.commons.lang.StringUtils;
 import org.apache.sling.api.SlingHttpServletRequest;
 import org.apache.sling.api.SlingHttpServletResponse;
 import org.apache.sling.api.resource.Resource;
 import org.apache.sling.api.servlets.HttpConstants;
 import org.apache.sling.api.servlets.SlingSafeMethodsServlet;
+import org.apache.sling.commons.json.jcr.JsonItemWriter;
 import org.apache.sling.servlets.annotations.SlingServletResourceTypes;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.propertytypes.ServiceDescription;
 
 import javax.servlet.Servlet;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Servlet that writes information about the Oscar films in json format into the response.
@@ -122,49 +126,19 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
     @Override
     public void doGet(final SlingHttpServletRequest req, final SlingHttpServletResponse resp) {
 
-        // Request parameter
-        /*List<RequestParameter> requestParams = req.getRequestParameterList();
-        System.out.println("requestParams List: " + requestParams);*/
-
-        /*Enumeration<String> parameterNames = req.getParameterNames();
-        while (parameterNames.hasMoreElements()) {
-
-            String paramName = parameterNames.nextElement();
-            System.out.println(paramName);
-
-            String[] paramValues = req.getParameterValues(paramName);
-            for (int i = 0; i < paramValues.length; i++) {
-                String paramValue = paramValues[i];
-                System.out.println("t" + paramValue);
-            }
-
-        }*/
-
         //TODO: remove this method call once your check is finished
         printEntries(req);
 
+        List<Film> resultFilms = tempList.stream()
+                .filter(addParamFilters(req).stream().reduce(x->true, Predicate::and))
+                .sorted(getSortComparator(req))
+                .collect(Collectors.toList());
 
+        System.out.println("Size of filtered list: " + resultFilms.size());
 
-        String param = "";
-        if(!req.getRequestParameterList().isEmpty()) {
-            param = req.getRequestParameter("numberOfReferences").toString();
-        }
-
-        for(Film film : tempList) {
-            if(StringUtils.equalsIgnoreCase(film.getNumberOfReferences(), param)) {
-                resultList.add(film);
-            }
-        }
-
-        for(Film film : resultList) {
-            System.out.println("resultList Title: " + film.getTitle());
-            System.out.println("resultList numberOfReferences: " + film.getNumberOfReferences());
-        }
-
-        System.out.println("Size of filtered list: " + resultList.size());
-
-
-        //TODO implement me
+        resp.setCharacterEncoding("UTF-8");
+        resp.setContentType("application/json;charset=UTF-8");
+        //resp.getWriter().write(resultFilms.toArray());
     }
 
     //TODO: remove this method once your check is finished
@@ -178,5 +152,49 @@ public class OscarFilmContainerServlet extends SlingSafeMethodsServlet {
             tempList.add(fm);
         }
         System.out.println("Size of provided list: " + tempList.size());
+    }
+
+    private List<Predicate<Film>> addParamFilters(final SlingHttpServletRequest request) {
+        List<Predicate<Film>> paramPredicates = new ArrayList<>();
+
+        if(!request.getRequestParameterList().isEmpty()) {
+            String title = request.getParameter("title");
+            if (title != null && !title.isEmpty()) {
+                paramPredicates.add(film -> film.getTitle().equalsIgnoreCase(title));
+            }
+
+            String minYear = request.getParameter("minYear");
+            if (minYear != null && !minYear.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getYear()) >= Integer.parseInt(minYear));
+            }
+
+            String maxYear = request.getParameter("maxYear");
+            if (maxYear != null && !maxYear.isEmpty()) {
+                paramPredicates.add(film -> Integer.parseInt(film.getYear()) >= Integer.parseInt(maxYear));
+            }
+        }
+
+        return paramPredicates;
+    }
+
+    private Comparator<Film> getSortComparator (final SlingHttpServletRequest request) {
+        if(!request.getRequestParameterList().isEmpty()) {
+            String sortBy = request.getParameter("sortBy");
+            if (sortBy != null && !sortBy.isEmpty()) {
+                //'title', 'year', 'awards', 'nominations'
+
+                if (sortBy.equalsIgnoreCase("year")) {
+                    return Comparator.comparing(Film::getYear);
+                }
+                if (sortBy.equalsIgnoreCase("awards")) {
+                    return Comparator.comparing(Film::getAwards);
+                }
+                if (sortBy.equalsIgnoreCase("nominations")) {
+                    return Comparator.comparing(Film::getNominations);
+                }
+            }
+        }
+
+        return Comparator.comparing(Film::getTitle);
     }
 }
